@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>IURIS – Gravação, Reescuta & Falas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b2f3b" />
+  <link rel="apple-touch-icon" href="icon.png" />
+
+  <style>
+    :root {
+      --bg: #040b11;
+      --card: #111827;
+      --accent: #16a34a;
+      --accent-soft: #065f46;
+      --danger: #dc2626;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --border: #1f2937;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #0f172a 0, #020617 50%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      margin: auto;
+      background: linear-gradient(145deg, #020617, #020617);
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    header img {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      letter-spacing: 0.06em;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .badge-backend {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(22, 163, 74, 0.1);
+      color: #bbf7d0;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    h2 {
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    section {
+      background: radial-gradient(circle at top left, #0b1120 0, #020617 55%);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 18px 16px 16px;
+      margin-bottom: 14px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .section-header small {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #22c55e);
+      color: #022c22;
+      box-shadow: 0 10px 30px rgba(34, 197, 94, 0.45);
+    }
+
+    .btn-primary[disabled] {
+      opacity: 0.5;
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .btn-secondary {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+    }
+
+    .pill-timer {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #f97316;
+      box-shadow: 0 0 8px rgba(249, 115, 22, 0.8);
+    }
+
+    .pill-dot.paused {
+      background: #9ca3af;
+      box-shadow: none;
+    }
+
+    .audio-player {
+      margin-top: 12px;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .audio-player audio {
+      width: 100%;
+    }
+
+    .status-line {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-line strong {
+      color: #e5e7eb;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #9ca3af;
+    }
+
+    .status-dot.ok {
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    .status-dot.error {
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    .status-error {
+      color: #fecaca;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      margin-top: 10px;
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .tag-row span {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    footer {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        padding: 18px;
+        border-radius: 20px;
+      }
+      header img {
+        width: 48px;
+        height: 48px;
+      }
+      header h1 {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <img src="icon.png" alt="IURIS Audiência" />
+      <div>
+        <div class="badge-backend">
+          <span class="badge-dot"></span>
+          Backend de transcrição conectado ao OpenAI
+        </div>
+        <h1>IURIS – Gravação, Reescuta &amp; Falas</h1>
+        <p>Grave a audiência, volte depois com calma, marque as falas e mande o áudio direto pro IURIS.</p>
+      </div>
+    </header>
+
+    <!-- 1. ÁUDIO -->
+    <section>
+      <div class="section-header">
+        <h2>1. Áudio</h2>
+        <small>Fluxo de batalha: clique em Gravar, faça a audiência, depois volte em Reescuta &amp; Marcar.</small>
+      </div>
+
+      <div class="controls-row">
+        <button id="btnGravar" class="btn-primary">● Iniciar gravação</button>
+        <button id="btnParar" class="btn-secondary" disabled>Parar</button>
+        <button id="btnBaixar" class="btn-secondary" disabled>Baixar áudio</button>
+
+        <span class="pill-timer" id="pillTimer">
+          <span class="pill-dot paused" id="pillDot"></span>
+          <span id="tempo">00:00</span>
+        </span>
+      </div>
+
+      <div class="audio-player" id="audioWrapper" style="display:none;">
+        <audio id="audioPlayer" controls></audio>
+      </div>
+
+      <div class="status-line">
+        <span class="status-dot" id="statusAudioDot"></span>
+        <span id="statusAudioTexto">Pronto para gravar.</span>
+      </div>
+    </section>
+
+    <!-- TRANSCRIÇÃO -->
+    <section>
+      <div class="section-header">
+        <h2>TRANSCRIÇÃO AUTOMÁTICA</h2>
+        <button id="btnTranscrever" class="btn-primary" disabled>Transcrever (OpenAI)</button>
+      </div>
+
+      <div class="status-line">
+        <span class="status-dot" id="statusBackendDot"></span>
+        <span id="statusBackendTexto">Aguardando áudio para transcrever.</span>
+      </div>
+
+      <textarea id="txtTranscricao" placeholder="A transcrição aparecerá aqui após o envio do áudio para o backend..." readonly></textarea>
+
+      <div class="tag-row">
+        <span>Hoje: usa o backend IURIS ligado à sua chave da OpenAI.</span>
+        <span>Basta gravar, parar e clicar em “Transcrever”.</span>
+      </div>
+    </section>
+
+    <!-- 2. REESCUTA & FALAS -->
+    <section>
+      <div class="section-header">
+        <h2>2. Reescuta &amp; Falas</h2>
+        <small>Na reescuta, dê play no áudio, pause em cada ponto e clique em quem está falando.</small>
+      </div>
+
+      <div class="controls-row">
+        <button class="btn-secondary">⚖️ Defesa</button>
+        <button class="btn-secondary">👤 Cliente</button>
+        <button class="btn-secondary">🏛️ MP</button>
+        <button class="btn-secondary">👨‍⚖️ Juiz</button>
+        <button class="btn-secondary">👤 Testemunha</button>
+      </div>
+
+      <p style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">
+        Dica: durante a reescuta, pause no trecho importante e clique no ator. A posição do áudio será registrada.
+      </p>
+
+      <div style="margin-top:12px; font-size:0.85rem; color:var(--text-muted);">
+        <strong>Falas marcadas:</strong>
+        <div id="falasMarcadas" style="margin-top:6px; font-size:0.8rem; color:var(--text-muted);">
+          <em>Nada marcado ainda. Use os botões de ator para registrar as falas.</em>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <label for="observacoes" style="display:block; font-size:0.9rem; margin-bottom:4px;">
+          Observações jurídicas
+        </label>
+        <textarea id="observacoes" placeholder="Anote aqui os pontos-chave para trabalhar depois nos IURIS (contradições, inversões, respostas boas, conduta do juiz, etc)..."></textarea>
+      </div>
+    </section>
+
+    <footer>
+      IURIS Audiência – versão 0.1 (teste com backend próprio)
+    </footer>
+  </div>
+
+  <script>
+    const BACKEND_URL = "https://iuris-audiencias-backend.onrender.com";
+
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let audioBlob = null;
+    let timerInterval = null;
+    let seconds = 0;
+
+    const btnGravar = document.getElementById("btnGravar");
+    const btnParar = document.getElementById("btnParar");
+    const btnBaixar = document.getElementById("btnBaixar");
+    const btnTranscrever = document.getElementById("btnTranscrever");
+    const audioPlayer = document.getElementById("audioPlayer");
+    const audioWrapper = document.getElementById("audioWrapper");
+    const tempoEl = document.getElementById("tempo");
+    const pillDot = document.getElementById("pillDot");
+    const statusAudioDot = document.getElementById("statusAudioDot");
+    const statusAudioTexto = document.getElementById("statusAudioTexto");
+    const statusBackendDot = document.getElementById("statusBackendDot");
+    const statusBackendTexto = document.getElementById("statusBackendTexto");
+    const txtTranscricao = document.getElementById("txtTranscricao");
+
+    function setAudioStatus(text, type = "idle") {
+      statusAudioTexto.textContent = text;
+      statusAudioDot.classList.remove("ok", "error");
+      if (type === "ok") statusAudioDot.classList.add("ok");
+      if (type === "error") statusAudioDot.classList.add("error");
+    }
+
+    function setBackendStatus(text, type = "idle") {
+      statusBackendTexto.textContent = text;
+      statusBackendDot.classList.remove("ok", "error");
+      if (type === "ok") statusBackendDot.classList.add("ok");
+      if (type === "error") statusBackendDot.classList.add("error");
+    }
+
+    function formatTime(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2, "0");
+      const s = String(sec % 60).padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    function startTimer() {
+      seconds = 0;
+      tempoEl.textContent = "00:00";
+      pillDot.classList.remove("paused");
+      timerInterval = setInterval(() => {
+        seconds += 1;
+        tempoEl.textContent = formatTime(seconds);
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      pillDot.classList.add("paused");
+    }
+
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recordedChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) recordedChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          audioBlob = new Blob(recordedChunks, { type: "audio/webm" });
+          const url = URL.createObjectURL(audioBlob);
+          audioPlayer.src = url;
+          audioWrapper.style.display = "flex";
+          btnBaixar.disabled = false;
+          btnTranscrever.disabled = false;
+          setAudioStatus("Gravação pronta para reescuta e transcrição.", "ok");
+        };
+
+        mediaRecorder.start();
+        startTimer();
+
+        btnGravar.disabled = true;
+        btnParar.disabled = false;
+        setAudioStatus("Gravando audiência...", "ok");
+      } catch (err) {
+        console.error(err);
+        setAudioStatus("Erro ao acessar o microfone. Verifique as permissões do navegador.", "error");
+      }
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach((t) => t.stop());
+      }
+      stopTimer();
+      btnGravar.disabled = false;
+      btnParar.disabled = true;
+    }
+
+    function downloadAudio() {
+      if (!audioBlob) return;
+      const url = URL.createObjectURL(audioBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "iuris-audiencia.webm";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function transcreverAudio() {
+      if (!audioBlob) {
+        setBackendStatus("Nenhum áudio gravado para enviar.", "error");
+        return;
+      }
+
+      btnTranscrever.disabled = true;
+      btnTranscrever.textContent = "Transcrevendo...";
+      setBackendStatus("Enviando áudio para o backend IURIS...", "ok");
+      txtTranscricao.value = "";
+
+      try {
+        const formData = new FormData();
+        formData.append("audio", audioBlob, "gravacao.webm");
+
+        const response = await fetch(`${BACKEND_URL}/transcrever-audio`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errText = await response.text().catch(() => "");
+          console.error("Erro HTTP:", response.status, errText);
+          setBackendStatus("Erro na transcrição. Confira a URL do backend e a chave da OpenAI.", "error");
+          txtTranscricao.value = `Erro ${response.status}: ${errText || "Falha ao transcrever o áudio."}`;
+          return;
+        }
+
+        const data = await response.json();
+        const texto = data.texto || data.text || JSON.stringify(data, null, 2);
+
+        txtTranscricao.value = texto || "[Transcrição vazia retornada pelo backend]";
+        setBackendStatus("Transcrição concluída com sucesso.", "ok");
+      } catch (err) {
+        console.error(err);
+        setBackendStatus("Erro ao conectar com o backend. Verifique se o serviço está ativo.", "error");
+        txtTranscricao.value = "Erro de rede ou CORS ao chamar o backend.";
+      } finally {
+        btnTranscrever.disabled = false;
+        btnTranscrever.textContent = "Transcrever (OpenAI)";
+      }
+    }
+
+    btnGravar.addEventListener("click", startRecording);
+    btnParar.addEventListener("click", stopRecording);
+    btnBaixar.addEventListener("click", downloadAudio);
+    btnTranscrever.addEventListener("click", transcreverAudio);
+
+    // Registro do Service Worker
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .catch((err) => console.error("Falha ao registrar service worker:", err));
+      });
+    }
+  </script>
+</body>
+</html>
